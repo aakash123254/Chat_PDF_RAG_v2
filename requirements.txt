@@ -1,0 +1,17 @@
+streamlit
+<<<<<<< HEAD
+google-generativeai
+python-dotenv
+langchain
+PyPDF2
+chromadb
+faiss-cpu
+langchain_google_genai
+=======
+PyPDF2
+langchain
+faiss-cpu
+sentence-transformers
+google-generativeai
+python-dotenv
+>>>>>>> da4521166 (Updated Code for Gemini and PDF)
