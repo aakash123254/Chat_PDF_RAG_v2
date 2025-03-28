@@ -137,7 +137,7 @@ user_template = """
 
 # ✅ Streamlit UI
 st.markdown(css, unsafe_allow_html=True)  # Apply custom CSS
-st.title("📄 PDF RAG ChatBot ")
+st.title("📄 PDF RAG ChatBot")
 
 # Initialize session state for conversation history
 if "chat_history" not in st.session_state:
@@ -170,10 +170,12 @@ for message in st.session_state.chat_history:
     st.markdown(message, unsafe_allow_html=True)
 
 # Input Box for User Query
-query = st.text_input("Ask a question:", key="query_input", placeholder="Type your question here...", value="")
+query = st.text_input("Ask a question:", key="query_input", placeholder="Type your question here...", on_change=None)
 
 # Callback Function for Submit Button
 def handle_submit():
+    # Get the query directly from session state
+    query = st.session_state.query_input.strip()
     if query:
         if "vector_store" in st.session_state:
             vector_store = st.session_state["vector_store"]
