@@ -137,7 +137,7 @@ user_template = """
 
 # ✅ Streamlit UI
 st.markdown(css, unsafe_allow_html=True)  # Apply custom CSS
-st.title("📄 Hybrid PDF + Gemini Chatbot")
+st.title("📄 PDF RAG ChatBot ")
 
 # Initialize session state for conversation history
 if "chat_history" not in st.session_state:
@@ -172,32 +172,34 @@ for message in st.session_state.chat_history:
 # Input Box for User Query
 query = st.text_input("Ask a question:", key="query_input", placeholder="Type your question here...", value="")
 
-# Button to Submit Query
-submit_button = st.button("Submit")
+# Callback Function for Submit Button
+def handle_submit():
+    if query:
+        if "vector_store" in st.session_state:
+            vector_store = st.session_state["vector_store"]
 
-if submit_button and query:
-    if "vector_store" in st.session_state:
-        vector_store = st.session_state["vector_store"]
-
-        # Generate Response
-        if is_query_related_to_pdf(query, vector_store):
-            # Retrieve answer from FAISS
-            docs = vector_store.similarity_search(query, k=3)
-            context = "\n".join([doc.page_content for doc in docs])
-            response = f"📄 Answer from PDF:\n{context}"
+            # Generate Response
+            if is_query_related_to_pdf(query, vector_store):
+                # Retrieve answer from FAISS
+                docs = vector_store.similarity_search(query, k=3)
+                context = "\n".join([doc.page_content for doc in docs])
+                response = f"📄 Answer from PDF:\n{context}"
+            else:
+                # Get answer from Gemini Flash for unrelated queries
+                response = get_gemini_answer(query)
         else:
-            # Get answer from Gemini Flash for unrelated queries
+            # If no PDF is uploaded, use Gemini Flash directly
             response = get_gemini_answer(query)
-    else:
-        # If no PDF is uploaded, use Gemini Flash directly
-        response = get_gemini_answer(query)
 
-    # Update conversation history
-    st.session_state.chat_history.append(user_template.replace("{{MSG}}", query))
-    st.session_state.chat_history.append(bot_template.replace("{{MSG}}", response))
+        # Update conversation history
+        st.session_state.chat_history.append(user_template.replace("{{MSG}}", query))
+        st.session_state.chat_history.append(bot_template.replace("{{MSG}}", response))
 
-    # Clear the input box
-    query = ""  # Reset the input field
+        # Clear the input box
+        st.session_state.query_input = ""  # Reset the input field
 
-    # Force Refresh to Update Chat History
-    st.rerun()  # Refresh the app to reflect changes
+# Button to Submit Query
+submit_button = st.button("Submit", on_click=handle_submit)
+
+# Ensure the input box reflects the cleared value
+query = st.session_state.get("query_input", "")
